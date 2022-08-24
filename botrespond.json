@@ -1,0 +1,15 @@
+{
+
+        "greetings":["Hi!","Helloooo~","Yoooo~ ^_^","Supppp","Yeaahhh","Yaaa","Wutttt",
+                     "Yawwww","Hellow","Greeting, human"],
+
+        "introduce":["Hi! My name is "],
+
+        "emotion":["Sad",
+        "Happy",
+        "Bored"],
+
+        "sad_reason":["my dogs died today",
+        "Nobody ask me to play today.",
+        "Nevermind."]
+}
