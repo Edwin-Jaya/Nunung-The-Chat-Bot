@@ -1,4 +1,4 @@
-# Nunung-The-Chat-Bot
+# Nunung The Chat Bot
 Python Chat Bot by Edwin Liona Jaya
 
 # Prerequiste :
