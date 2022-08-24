@@ -52,6 +52,7 @@ class app(tk.Tk):
         global teks
         teks = tk.Text(chatPanel, wrap='word')
         scrollbar.config(command=teks.yview)
+        userEntry.bind('<Return>', self.sendEnter)
 
     def send(self):
         global user_var
@@ -61,7 +62,15 @@ class app(tk.Tk):
             self.insertText(concat)
             self.botRespond(userEntry)
             user_var.set("")
-
+    
+    def sendEnter(self,event):
+        global user_var
+        if (user_var != ""):
+            userEntry = user_var.get()
+            concat = "user : " + userEntry
+            self.insertText(concat)
+            self.botRespond(userEntry)
+            user_var.set("")
 
     def insertText(self, text):
         global teks
