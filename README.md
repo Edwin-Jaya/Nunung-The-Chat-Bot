@@ -10,7 +10,9 @@ This chat bot is still in development, right now it's only could do stuff like :
 
 1. Greetings : 'hi nunung', 'hello nunung', 'sup nunung' 
 2. Tell Time : 'what time is it nunung ?', 'tell me time nunung'
-3. Help      : 'help nunung'"
-4. Quit      : 'quit
+3. Help      : 'help nunung'
+4. Quit      : 'quit'
+
+(Without the apostrophe)
 
 In the future i hope to implement ML and turn this Rule Based bot into an AI bot.
