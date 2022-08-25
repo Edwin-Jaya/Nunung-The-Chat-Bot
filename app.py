@@ -8,7 +8,8 @@ import json
 from PIL import ImageTk, Image
 from io import BytesIO
 from urllib.request import urlopen
-
+from itertools import count, cycle
+ 
 class app(tk.Tk):
     def __init__(self):
         super().__init__()
@@ -41,10 +42,13 @@ class app(tk.Tk):
         lbl.img = img  
         lbl.place(relx=0.5, rely=0.5, anchor='center') 
         headerPanel.pack(fill=BOTH)
-        photo = ImageTk.PhotoImage(Image.open('./Images/nunung.jpg'))  
-        labelpic=tk.Label(headerPanel,image=photo, borderwidth=0)
-        labelpic.photo = photo
-        labelpic.pack(padx=8, pady=10, side=LEFT)
+        #photo = ImageTk.PhotoImage(Image.open('./Images/nunung.jpg'))
+        #labelpic=tk.Label(headerPanel,image=photo, borderwidth=0)
+        #labelpic.photo = photo
+        #labelpic.pack(padx=8, pady=10, side=LEFT)
+        photo = ImageLabel(headerPanel,borderwidth=0)
+        photo.pack(padx=8, pady=10, side=LEFT)
+        photo.load('./Images/nunung-profile.gif')  
         label = tk.Label(headerPanel, foreground="White", background="Black",text="Nunung", font=("Verdana", 14))
         label.pack(padx=2, pady=10, side=LEFT)
         labelVersion = tk.Label(headerPanel, foreground="White", background="Black",text="version 1.0", font=("arial", 10))
@@ -76,8 +80,9 @@ class app(tk.Tk):
         scrollbar.config(command=teks.yview)
         userEntry.bind('<Return>', self.sendEnter)
         teks.tag_configure('bot_text', foreground="green")
+        teks.tag_configure('warning', foreground="red")
         teks.tag_configure('user_text', foreground="white")
-
+    
     def send(self):
         tagChat='user_text'
         global user_var
@@ -115,28 +120,59 @@ class app(tk.Tk):
         searchEntry.insert(0,'Put your youtube link here')
         searchEntry.bind('<Button-1>', self.clearBox)
         searchEntry.bind('<Return>', self.getYoutubeVideosData)
-        return contentPanel
-    
+        self.retrieve(self)
+
     def getYoutubeVideosData(self,event):
+        tagChat='warning'
         youtubelink = ytlink.get()
         print(youtubelink)
+        global yt
         yt = YouTube(youtubelink)
+        vidauthor=yt.author
+        vidlength=yt.length
         vidtitle=yt.title
         imgurl = yt.thumbnail_url
         u = urlopen(imgurl)
         img_raw_data = u.read()
         u.close()
-        self.setYoutubeThumb(vidtitle,img_raw_data)
-
-    def setYoutubeThumb(self,title,thumb):
-        videostitle = tk.Label(ytFrame,text=title)
+        self.setYoutubeThumb(vidtitle,img_raw_data,vidauthor,vidlength)
+        sendButton = tk.Button(ytFrame, text=" D O W N L O A D ",font=('fixedsys', 18, 'bold'), background="Black", foreground="Green", \
+        command=self.downloadVideo, borderwidth=0)
+        sendButton.place(relx=0.5, rely=0.8, anchor='center')
+        br = botName + " : " + "Okay, okay, hold on a sec. Don't panic if you see me not responding ok,"+ \
+                " that'd happen because i'd have to hack into satellite and stuff. It's hard you know, so just sit tight. Be a good boy and imma give you 720p. *wink*"
+        self.insertText(br,tagChat)
+    
+    def convert(self,seconds):
+        min, sec = divmod(seconds, 60)
+        hour, min = divmod(min, 60)
+        return "%d:%02d:%02d" % (hour, min, sec)
+    
+    def setYoutubeThumb(self,title,thumb,author,length):
+        vidlength=self.convert(length)
+        videostitle = tk.Label(ytFrame,text=title,font=("arial",16),wraplength=400)
         videostitle.place(relx=0.5, rely=0.2, anchor='center')
         img = Image.open(BytesIO(thumb)).resize((200, 150), Image.ANTIALIAS)
         photo = ImageTk.PhotoImage(img)
         lbl = tk.Label(ytFrame, image=photo)
         lbl.imgRain = photo  
         lbl.place(relx=0.5, rely=0.4, anchor='center')
-        
+        videosauthor = tk.Label(ytFrame,text="Author : "+author,font=("arial",12),wraplength=400)
+        videosauthor.place(relx=0.3, rely=0.6, anchor='center')
+        videoslength = tk.Label(ytFrame,text="Length : "+vidlength,font=("arial",12),wraplength=400)
+        videoslength.place(relx=0.7, rely=0.6, anchor='center')
+    
+    def downloadVideo(self):
+        tagChat='warning'
+        mp4files = yt.streams.filter(progressive=True).get_highest_resolution()
+        SAVE_PATH = "E:/"
+        try:
+            mp4files.download(SAVE_PATH) 
+            br = botName + " : " + "Done. I put it in " + SAVE_PATH +". Your welcome."
+            self.insertText(br,tagChat)
+        except: 
+            br = botName + " : " + "Something's wrong. Failed."
+            self.insertText(br,tagChat)
 
     def clearBox(self,event):
         searchEntry.delete(0, END)
@@ -198,12 +234,14 @@ class app(tk.Tk):
                 self.confusedResp()
 
     def help(self):
-        tagChat="bot_text"
+        tagChat="warning"
         words="LIST COMMAND : \n" \
+              "-----------------------------------------------\n" \
               "1. Greetings : 'hi nunung','hello nunung','sup nunung'\n" \
               "2. Tell Time : 'tell me time nunung'\n" \
-              "4. Help      : 'help nunung' \n" \
-              "3. Quit      : 'quit'"
+              "3. Help      : 'help nunung' \n" \
+              "4. Youtube Download      : 'yt nunung' \n" \
+              "5. Quit      : 'quit'"
         self.insertText(words,tagChat)
 
     def confusedResp(self):
@@ -217,7 +255,40 @@ class app(tk.Tk):
         convert = str(word).replace("}", "").replace("{", "").replace("[", "").replace("]", "").replace("'","").replace(",", " ").replace('"', " ")
         return convert
 
+class ImageLabel(tk.Label):
 
+    def load(self, im):
+        if isinstance(im, str):
+            im = Image.open(im)
+        frames = []
+ 
+        try:
+            for i in count(1):
+                frames.append(ImageTk.PhotoImage(im.copy()))
+                im.seek(i)
+        except EOFError:
+            pass
+        self.frames = cycle(frames)
+ 
+        try:
+            self.delay = im.info['duration']
+        except:
+            self.delay = 100
+ 
+        if len(frames) == 1:
+            self.config(image=next(self.frames))
+        else:
+            self.next_frame()
+ 
+    def unload(self):
+        self.config(image=None)
+        self.frames = None
+ 
+    def next_frame(self):
+        if self.frames:
+            self.config(image=next(self.frames))
+            self.after(self.delay, self.next_frame)
+ 
 if __name__ == '__main__':
     app = app()
     app.mainloop()
