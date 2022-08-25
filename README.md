@@ -18,3 +18,4 @@ This chat bot is still in development, right now it's only could do stuff like :
 In the future i hope to implement ML and turn this Rule Based bot into an AI bot.
 
 # SCREENSHOT
+![My Image](./Screenshots/1.jpeg)
