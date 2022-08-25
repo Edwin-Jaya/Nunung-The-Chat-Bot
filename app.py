@@ -1,4 +1,5 @@
 import random
+from pytube import YouTube
 from faulthandler import disable
 from datetime import datetime
 from tkinter import *
@@ -11,6 +12,7 @@ from urllib.request import urlopen
 class app(tk.Tk):
     def __init__(self):
         super().__init__()
+        self.geometry("1024x640")
         self.initUI()
         timenow = datetime.now()
         global currenttime
@@ -24,11 +26,17 @@ class app(tk.Tk):
 
     def initUI(self):
         #header Panel
+        chatFrame=Frame(self, background="Black", width=512, height=640)
+        chatFrame.grid(row= 0,column=0)
+        chatFrame.pack_propagate(False)
+        global ytFrame
+        ytFrame=Frame(self, background="Black", width=512, height=640)
+        ytFrame.grid(row= 0,column=1)
+        ytFrame.pack_propagate(False)
         self.resizable(False, False)
-        self.geometry("450x525")
         self.title("Nunung The Chat Bot By Edwin Liona Jaya")
-        headerPanel = Frame(self, bg="black")
-        img = ImageTk.PhotoImage(Image.open("./Images/headerPanel.jpg").resize((450, 80), Image.ANTIALIAS))
+        headerPanel = Frame(chatFrame, bg="black")
+        img = ImageTk.PhotoImage(Image.open("./Images/headerPanel.jpg").resize((512, 80), Image.ANTIALIAS))
         lbl = tk.Label(headerPanel, image=img)
         lbl.img = img  
         lbl.place(relx=0.5, rely=0.5, anchor='center') 
@@ -41,19 +49,25 @@ class app(tk.Tk):
         label.pack(padx=2, pady=10, side=LEFT)
         labelVersion = tk.Label(headerPanel, foreground="White", background="Black",text="version 1.0", font=("arial", 10))
         labelVersion.pack(padx=10, pady=10, side=RIGHT)
+        #ytFrame
+        imgRain = ImageTk.PhotoImage(Image.open("./Images/nunungRoom.jpg").resize((512, 640), Image.ANTIALIAS))
+        lbl = tk.Label(ytFrame, image=imgRain)
+        lbl.imgRain = imgRain  
+        lbl.place(relx=0.5, rely=0.5, anchor='center')
         #chat Panel
-        chatPanel = Frame(self)
+        chatPanel = Frame(chatFrame)
         chatPanel.pack(fill=BOTH)
         global teks
-        teks = tk.Text(chatPanel, wrap='word', bg="black")
-        userInputPanel = Frame(self, bg="black")
+        teks = tk.Text(chatPanel, wrap='word', bg="black", height=31)
+        userInputPanel = Frame(chatFrame, bg="black")
         userInputPanel.pack(side=BOTTOM, fill=BOTH)
         scrollbar = Scrollbar(chatPanel, orient=VERTICAL, bg="White")
         scrollbar.pack(side=RIGHT,
                        fill=Y)
+        #panelEntry
         global user_var
         user_var = tk.StringVar()
-        userEntry = tk.Entry(userInputPanel, width=40, font=('arial', 12, 'normal'), textvariable=user_var,bd=1,\
+        userEntry = tk.Entry(userInputPanel, width=43, font=('arial', 12, 'normal'), textvariable=user_var,bd=1,\
             relief=FLAT,highlightbackground="white",highlightcolor="black", highlightthickness=2)
         userEntry.pack(side=LEFT, pady=15, padx=15)
         sendButton = tk.Button(userInputPanel, text=" > ",font=('fixedsys', 18, 'bold'), background="Black", foreground="Green", \
@@ -83,7 +97,51 @@ class app(tk.Tk):
             self.insertText(concat, tagChat)
             self.botRespond(userEntry)
             user_var.set("")
+    
+    def setYoutubeFrameUI(self):
+        global contentPanel
+        contentPanel=Frame(ytFrame, background="Black", width=512, height=640)
+        contentPanel.grid(row= 0,column=0)
+        contentPanel.pack_propagate(False)
+        imgRain = ImageTk.PhotoImage(Image.open("./Images/youtubeNunung.jpg").resize((512, 640), Image.ANTIALIAS))
+        lbl = tk.Label(ytFrame, image=imgRain)
+        lbl.imgRain = imgRain  
+        lbl.place(relx=0.5, rely=0.5, anchor='center')
+        global searchEntry
+        global ytlink
+        ytlink = tk.StringVar()
+        searchEntry = tk.Entry(ytFrame, width=50, textvariable=ytlink)
+        searchEntry.grid(row=0,sticky="n", ipady=3,pady=15)
+        searchEntry.insert(0,'Put your youtube link here')
+        searchEntry.bind('<Button-1>', self.clearBox)
+        searchEntry.bind('<Return>', self.getYoutubeVideosData)
+        return contentPanel
+    
+    def getYoutubeVideosData(self,event):
+        youtubelink = ytlink.get()
+        print(youtubelink)
+        yt = YouTube(youtubelink)
+        vidtitle=yt.title
+        imgurl = yt.thumbnail_url
+        u = urlopen(imgurl)
+        img_raw_data = u.read()
+        u.close()
+        self.setYoutubeThumb(vidtitle,img_raw_data)
 
+    def setYoutubeThumb(self,title,thumb):
+        videostitle = tk.Label(ytFrame,text=title)
+        videostitle.place(relx=0.5, rely=0.2, anchor='center')
+        img = Image.open(BytesIO(thumb)).resize((200, 150), Image.ANTIALIAS)
+        photo = ImageTk.PhotoImage(img)
+        lbl = tk.Label(ytFrame, image=photo)
+        lbl.imgRain = photo  
+        lbl.place(relx=0.5, rely=0.4, anchor='center')
+        
+
+    def clearBox(self,event):
+        searchEntry.delete(0, END)
+        return
+    
     def insertText(self, text, tagChat):
         global teks
         teks.configure(state=NORMAL)
@@ -130,6 +188,10 @@ class app(tk.Tk):
                     self.insertText(words,tagChat)
             case ["help","nunung"]:
                 self.help()
+            case ["yt", "nunung"]:
+                words = botName + " : " + "You know you could just stream it... but ok, imma switch to my laptop."
+                self.insertText(words,tagChat)
+                self.setYoutubeFrameUI()
             case ["quit"]:
                 exit()
             case _:
