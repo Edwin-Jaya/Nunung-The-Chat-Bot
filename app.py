@@ -56,7 +56,8 @@ class app(tk.Tk):
         userEntry = tk.Entry(userInputPanel, width=40, font=('arial', 12, 'normal'), textvariable=user_var,bd=1,\
             relief=FLAT,highlightbackground="white",highlightcolor="black", highlightthickness=2)
         userEntry.pack(side=LEFT, pady=15, padx=15)
-        sendButton = tk.Button(userInputPanel, text="SEND", command=self.send)
+        sendButton = tk.Button(userInputPanel, text=" > ",font=('fixedsys', 18, 'bold'), background="Black", foreground="Green", \
+            command=self.send, borderwidth=0)
         sendButton.pack(side=LEFT)
         scrollbar.config(command=teks.yview)
         userEntry.bind('<Return>', self.sendEnter)
@@ -103,16 +104,17 @@ class app(tk.Tk):
         self.insertText(br,tagChat)
 
     def botRespond(self,word):
+        global botName
         tagChat='bot_text'
         bedTime = "21:00:00"
         lunchTime = "12:00:00"
         dumbMasterTime = "17:00:00"
         match word.split():
-            case ["hi", botName ]| ["hello", botName]| ["sup", botName]:
+            case ["hi", "nunung" ]| ["hello", "nunung"]| ["sup", "nunung"]:
                 a = random.choice(botrespond['greetings'])
                 br = botName + " : " + a
                 self.insertText(br,tagChat)
-            case ["what","time", "is","it", botName,"?"] | ["tell","me", "time", botName]:
+            case ["tell","me", "time", "nunung"]:
                 br = botName + " : " + "It's " + currenttime + " in your area."
                 self.insertText(br,tagChat)
                 if(currenttime>=bedTime):
@@ -126,7 +128,7 @@ class app(tk.Tk):
                             " Well, he's not bad and not good either. But sometimes when he didn't have coffee for breakfast, he'd be dumb asf." \
                             " Btw it's a perfect time to take a shower to keep your body, mind, and soul cleannn."
                     self.insertText(words,tagChat)
-            case ["help",botName]:
+            case ["help","nunung"]:
                 self.help()
             case ["quit"]:
                 exit()
@@ -137,14 +139,15 @@ class app(tk.Tk):
         tagChat="bot_text"
         words="LIST COMMAND : \n" \
               "1. Greetings : 'hi nunung','hello nunung','sup nunung'\n" \
-              "2. Tell Time : 'what time is it nunung ?', 'tell me time nunung'\n" \
+              "2. Tell Time : 'tell me time nunung'\n" \
               "4. Help      : 'help nunung' \n" \
               "3. Quit      : 'quit'"
         self.insertText(words,tagChat)
 
     def confusedResp(self):
         tagChat="bot_text"
-        confused = botName + " : " + "Hmm... I'm sorry, i don't understand what you said :( Please check your typing or type help to see my command list."
+        confused = botName + " : " + "Hmm... I'm sorry, i don't understand what you said :( " \
+            +"Please check your typing or type 'help nunung' to see my command list."
         self.insertText(confused,tagChat)
         return confused
 
